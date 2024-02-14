@@ -22,7 +22,7 @@ public class AccountService {
     private AccountRepository accountRepository;
 
     public AccountDto saveAccount(AccountDto accountDto){
-        log.info("AccountService.saveAccount method is called...");
+        log.info("AccountService.saveAccount() method is called...");
         Account account = AccountMapper.mapAccountDtoToAccount(accountDto);
         Account accountSaved = accountRepository.save(account);
         log.debug("account saved in database : {}",accountSaved);
@@ -30,7 +30,7 @@ public class AccountService {
     }
 
     public AccountDto getAccountById(Integer accountId) throws AccountNotFoundException {
-        log.info("AccountService.getAccountById method is called...");
+        log.info("AccountService.getAccountById() method is called...");
 
         Optional<Account> optionalAccount = getAccount(accountId);
         log.debug("Account retrieved from database : {}",optionalAccount.get());
@@ -38,7 +38,7 @@ public class AccountService {
     }
 
     public List<AccountDto> getAllAccounts(){
-        log.info("AccountService.getAllAccounts method is called...");
+        log.info("AccountService.getAllAccounts() method is called...");
         List<Account> accounts = accountRepository.findAll();
         log.debug("all accounts retrieved from database : {}",accounts);
         List<AccountDto> accountDtoList = accounts.stream()
@@ -51,14 +51,14 @@ public class AccountService {
     }
 
     public double getCurrentBalance(Integer accountId) throws AccountNotFoundException {
-        log.info("AccountService.getCurrentBalance method is called...");
+        log.info("AccountService.getCurrentBalance() method is called...");
         Optional<Account> optionalAccount = getAccount(accountId);
         log.info("CURRENT BALANCE retrieved : {}",optionalAccount.get().getBalance());
         return optionalAccount.get().getBalance();
     }
 
     public AccountDto depositBalance(Integer accountId,double depositAmount) throws AccountNotFoundException {
-        log.info("AccountService.depositBalance method is called...");
+        log.info("AccountService.depositBalance() method is called...");
         log.info("Balance to deposit : {}",depositAmount);
         Optional<Account> optionalAccount = getAccount(accountId);
         log.debug("Account retrieved : {}",optionalAccount.get());
@@ -73,7 +73,7 @@ public class AccountService {
     }
 
     public AccountDto withdrawBalance(Integer accountId,double withdrawAmount) throws AccountNotFoundException, InsufficientBalanceException {
-        log.info("AccountService.withdrawBalance method is called...");
+        log.info("AccountService.withdrawBalance() method is called...");
         log.info("AMOUNT TO WITHDRAW : {}",withdrawAmount);
         Optional<Account> optionalAccount = getAccount(accountId);
         log.debug("Account retrieved : {}",optionalAccount.get());
@@ -93,7 +93,7 @@ public class AccountService {
     }
 
     private Optional<Account> getAccount(Integer accountId) throws AccountNotFoundException {
-        log.info("AccountService.getAccount method is called...");
+        log.info("AccountService.getAccount() method is called...");
         log.info("retrieving account for ID : {}",accountId);
         Optional<Account> optionalAccount = accountRepository.findById(accountId);
         if(optionalAccount.isEmpty()){
