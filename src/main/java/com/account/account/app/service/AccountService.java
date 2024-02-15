@@ -4,7 +4,7 @@ import com.account.account.app.dto.AccountDto;
 import com.account.account.app.entity.Account;
 import com.account.account.app.exception.AccountNotFoundException;
 import com.account.account.app.exception.InsufficientBalanceException;
-import com.account.account.app.exception.InvalidAccountIdException;
+import com.account.account.app.exception.NoAccountFoundException;
 import com.account.account.app.mapper.AccountMapper;
 import com.account.account.app.repository.AccountRepository;
 import lombok.AllArgsConstructor;
@@ -37,9 +37,13 @@ public class AccountService {
         return AccountMapper.mapAccountToAccountDto(optionalAccount.get());
     }
 
-    public List<AccountDto> getAllAccounts(){
+    public List<AccountDto> getAllAccounts() throws NoAccountFoundException {
         log.info("AccountService.getAllAccounts() method is called...");
         List<Account> accounts = accountRepository.findAll();
+        if(accounts.isEmpty()){
+            log.error("There is no account exist in database");
+            throw new NoAccountFoundException("No account exists in database");
+        }
         log.debug("all accounts retrieved from database : {}",accounts);
         return accounts.stream()
                 .map(account -> new AccountDto(account.getId(),
@@ -99,5 +103,14 @@ public class AccountService {
             throw new AccountNotFoundException("Account doesn't exists");
         }
         return optionalAccount;
+    }
+
+    public void deleteById(Integer accountId) throws AccountNotFoundException {
+        log.info("AccountService.deleteById() method is called...");
+        Optional<Account> optionalAccount = this.getAccount(accountId);
+        log.info("account to be deleted : {}",optionalAccount.get());
+        accountRepository.deleteById(accountId);
+        log.info("account deleted successfully");
+
     }
 }

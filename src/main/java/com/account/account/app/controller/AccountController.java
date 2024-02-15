@@ -3,7 +3,7 @@ package com.account.account.app.controller;
 import com.account.account.app.dto.AccountDto;
 import com.account.account.app.exception.AccountNotFoundException;
 import com.account.account.app.exception.InsufficientBalanceException;
-import com.account.account.app.exception.InvalidAccountIdException;
+import com.account.account.app.exception.NoAccountFoundException;
 import com.account.account.app.service.AccountService;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,9 +43,14 @@ public class AccountController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<AccountDto>> getAllAccounts(){
+    public ResponseEntity<Object> getAllAccounts(){
         log.info("AccountController.getAllAccounts() method is called...");
-        return ResponseEntity.ok(accountService.getAllAccounts());
+
+        try {
+            return ResponseEntity.ok(accountService.getAllAccounts());
+        } catch (NoAccountFoundException e) {
+          return ResponseEntity.status(HttpStatus.NO_CONTENT).body(e.getMessage());
+        }
     }
 
     @GetMapping("/balance/{id}")
@@ -79,6 +84,17 @@ public class AccountController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }catch (InsufficientBalanceException e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<String> deleteAccount(@PathVariable("id") Integer accountId){
+        log.info("AccountController.deleteAccount() method is called...");
+        try {
+            accountService.deleteById(accountId);
+            return ResponseEntity.ok("account deleted successfully");
+        } catch (AccountNotFoundException e) {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 }
