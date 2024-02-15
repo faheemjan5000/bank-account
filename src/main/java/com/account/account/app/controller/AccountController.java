@@ -3,9 +3,10 @@ package com.account.account.app.controller;
 import com.account.account.app.dto.AccountDto;
 import com.account.account.app.exception.AccountNotFoundException;
 import com.account.account.app.exception.InsufficientBalanceException;
+import com.account.account.app.exception.InvalidAccountIdException;
 import com.account.account.app.service.AccountService;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -15,10 +16,11 @@ import java.util.List;
 
 @Slf4j
 @RestController
+@AllArgsConstructor
 @RequestMapping("/account")
 public class AccountController {
 
-    @Autowired
+
     private AccountService accountService;
 
     @PostMapping("/add")
@@ -31,6 +33,7 @@ public class AccountController {
     @GetMapping("/get/{id}")
     public ResponseEntity<Object> getAccountById(@PathVariable("id") Integer accountId){
         log.info("AccountController.getAccountById() method is called...");
+        log.info("ACCOUNTID IS : {}",accountId);
         try {
             AccountDto accountDto = accountService.getAccountById(accountId);
             return ResponseEntity.ok(accountDto);
@@ -56,7 +59,7 @@ public class AccountController {
     }
 
     @PutMapping("/deposit/{id}/{amount}")
-    public ResponseEntity<?> deposit(@PathVariable("id") Integer accountId,@PathVariable("amount") double amountToAdd){
+    public ResponseEntity<Object> deposit(@PathVariable("id") Integer accountId,@PathVariable("amount") double amountToAdd){
         log.info("AccountController.deposit() method is called...");
 
         try {
@@ -67,7 +70,7 @@ public class AccountController {
     }
 
     @PutMapping("/withdraw/{id}/{amount}")
-    public ResponseEntity<?> withdraw(@PathVariable("id") Integer accountId,@PathVariable("amount") double amountToWithdraw){
+    public ResponseEntity<Object> withdraw(@PathVariable("id") Integer accountId,@PathVariable("amount") double amountToWithdraw){
         log.info("AccountController.deposit() method is called...");
 
         try {

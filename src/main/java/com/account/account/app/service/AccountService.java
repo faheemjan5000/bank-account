@@ -4,6 +4,7 @@ import com.account.account.app.dto.AccountDto;
 import com.account.account.app.entity.Account;
 import com.account.account.app.exception.AccountNotFoundException;
 import com.account.account.app.exception.InsufficientBalanceException;
+import com.account.account.app.exception.InvalidAccountIdException;
 import com.account.account.app.mapper.AccountMapper;
 import com.account.account.app.repository.AccountRepository;
 import lombok.AllArgsConstructor;
@@ -31,7 +32,6 @@ public class AccountService {
 
     public AccountDto getAccountById(Integer accountId) throws AccountNotFoundException {
         log.info("AccountService.getAccountById() method is called...");
-
         Optional<Account> optionalAccount = getAccount(accountId);
         log.debug("Account retrieved from database : {}",optionalAccount.get());
         return AccountMapper.mapAccountToAccountDto(optionalAccount.get());
@@ -41,13 +41,11 @@ public class AccountService {
         log.info("AccountService.getAllAccounts() method is called...");
         List<Account> accounts = accountRepository.findAll();
         log.debug("all accounts retrieved from database : {}",accounts);
-        List<AccountDto> accountDtoList = accounts.stream()
+        return accounts.stream()
                 .map(account -> new AccountDto(account.getId(),
                         account.getAccountHolderName(),
                         account.getBalance()))
                 .toList();
-
-        return  accountDtoList;
     }
 
     public double getCurrentBalance(Integer accountId) throws AccountNotFoundException {
