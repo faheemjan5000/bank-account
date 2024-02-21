@@ -2,6 +2,7 @@ package com.account.account.app.controller;
 
 import com.account.account.app.dto.AccountDto;
 import com.account.account.app.exception.AccountNotFoundException;
+import com.account.account.app.exception.DublicateIbanException;
 import com.account.account.app.exception.InsufficientBalanceException;
 import com.account.account.app.exception.NoAccountFoundException;
 import com.account.account.app.service.AccountService;
@@ -24,10 +25,15 @@ public class AccountController {
     private AccountService accountService;
 
     @PostMapping("/add")
-    public ResponseEntity<AccountDto> saveAccount(@RequestBody @Validated AccountDto accountDto){
-        log.info(".AccountController.saveAccount() method is called...");
-
-           return new ResponseEntity<>(accountService.saveAccount(accountDto), HttpStatus.CREATED);
+    public ResponseEntity<Object> saveAccount(@RequestBody @Validated AccountDto accountDto){
+        log.info("AccountController.saveAccount() method is called...");
+        try {
+            return new ResponseEntity<>(accountService.saveAccount(accountDto), HttpStatus.CREATED);
+        } catch (DublicateIbanException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
     }
 
     @GetMapping("/get/{id}")
@@ -35,8 +41,7 @@ public class AccountController {
         log.info("AccountController.getAccountById() method is called...");
         log.info("ACCOUNTID IS : {}",accountId);
         try {
-            AccountDto accountDto = accountService.getAccountById(accountId);
-            return ResponseEntity.ok(accountDto);
+            return ResponseEntity.ok(accountService.getAccountById(accountId));
         }catch (AccountNotFoundException e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
@@ -96,5 +101,47 @@ public class AccountController {
         } catch (AccountNotFoundException e) {
            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
+
+    @GetMapping("/name/{name}")
+    public ResponseEntity<Object> findByAccountHolderName(@PathVariable("name") String accountHolder){
+         log.info("AccountController.findByAccountHolderName method is called...");
+         try {
+             return ResponseEntity.ok(accountService.findByAccountHolderName(accountHolder));
+         } catch (AccountNotFoundException e) {
+             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+         }
+    }
+
+    @GetMapping("/accountByIban/{iban}")
+    public ResponseEntity<Object> findByIban(@PathVariable("iban") String iban){
+        log.info("AccountController.findByIban method is called...");
+        log.info("IBAN : {}",iban);
+        try {
+            return ResponseEntity.ok(accountService.findByIban(iban));
+        } catch (AccountNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/iban/{id}")
+    public ResponseEntity<String> getIbanNumberById(@PathVariable("id") Integer accountId){
+        log.info("AccountController.getIbanNumberById() method is calling...");
+        log.info("Account id passed : {}",accountId);
+        try {
+            String iban = accountService.getIbanNumberById(accountId);
+           return ResponseEntity.ok(iban);
+        } catch (AccountNotFoundException e) {
+           return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e){
+            log.error(e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/IbanList")
+    public ResponseEntity<List<String>> getAllIbans(){
+        log.info("AccountController.getIbanNumberById() method is calling...");
+        return ResponseEntity.ok(accountService.getAllIbanNumbers());
     }
 }

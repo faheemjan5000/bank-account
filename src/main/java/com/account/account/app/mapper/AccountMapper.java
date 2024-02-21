@@ -10,6 +10,7 @@ public class AccountMapper {
         accountDto.setAccountHolderName(account.getAccountHolderName());
         accountDto.setId(account.getId());
         accountDto.setBalance(account.getBalance());
+        accountDto.setIban(account.getIban());
 
         return accountDto;
     }
@@ -19,6 +20,7 @@ public class AccountMapper {
         account.setAccountHolderName(accountDto.getAccountHolderName());
         account.setBalance(accountDto.getBalance());
         account.setId(accountDto.getId());
+        account.setIban(accountDto.getIban());
 
         return account;
     }

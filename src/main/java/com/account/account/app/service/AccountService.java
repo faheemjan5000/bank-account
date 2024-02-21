@@ -3,6 +3,7 @@ package com.account.account.app.service;
 import com.account.account.app.dto.AccountDto;
 import com.account.account.app.entity.Account;
 import com.account.account.app.exception.AccountNotFoundException;
+import com.account.account.app.exception.DublicateIbanException;
 import com.account.account.app.exception.InsufficientBalanceException;
 import com.account.account.app.exception.NoAccountFoundException;
 import com.account.account.app.mapper.AccountMapper;
@@ -22,8 +23,15 @@ public class AccountService {
 
     private AccountRepository accountRepository;
 
-    public AccountDto saveAccount(AccountDto accountDto){
+    public AccountDto saveAccount(AccountDto accountDto) throws DublicateIbanException {
         log.info("AccountService.saveAccount() method is called...");
+        log.info("checking if IBAN already exists...");
+        log.info("IBAN : {}",accountDto.getIban());
+        if(this.getAllIbanNumbers().contains(accountDto.getIban())){
+            log.error("IBAN already exists");
+            throw new DublicateIbanException("IBAN already exists,plz use a different IBAN number");
+        }
+        log.error("IBAN duplication test passed.");
         Account account = AccountMapper.mapAccountDtoToAccount(accountDto);
         Account accountSaved = accountRepository.save(account);
         log.debug("account saved in database : {}",accountSaved);
@@ -48,7 +56,7 @@ public class AccountService {
         return accounts.stream()
                 .map(account -> new AccountDto(account.getId(),
                         account.getAccountHolderName(),
-                        account.getBalance()))
+                        account.getBalance(),account.getIban()))
                 .toList();
     }
 
@@ -94,6 +102,30 @@ public class AccountService {
          return AccountMapper.mapAccountToAccountDto(accountSaved);
     }
 
+    public AccountDto findByAccountHolderName(String accountholder) throws AccountNotFoundException {
+        log.info("AccountService.findByAccountHolderName() method is calling...");
+        log.info("Retrieving account by Name : {}",accountholder);
+         Account accountRetrieved  = accountRepository.findByAccountHolderName(accountholder);
+         if(accountRetrieved == null){
+             log.error("Account retrieving error");
+             throw new AccountNotFoundException("account doesn't exist by name : "+accountholder);
+         }
+         log.info("Account retrieved by Name : {}",accountRetrieved);
+         return AccountMapper.mapAccountToAccountDto(accountRetrieved);
+    }
+
+    public AccountDto findByIban(String iban) throws AccountNotFoundException {
+        log.info("AccountService.findByIban() method is calling...");
+        log.info("Retrieving account by iban : {}",iban);
+        Account accountRetrieved  = accountRepository.findByIban(iban);
+        if(accountRetrieved == null){
+            log.error("Account retrieving error");
+            throw new AccountNotFoundException("Account not found for IBAN : "+iban);
+        }
+        log.info("Account retrieved by IBAN : {}",accountRetrieved);
+        return AccountMapper.mapAccountToAccountDto(accountRetrieved);
+    }
+
     private Optional<Account> getAccount(Integer accountId) throws AccountNotFoundException {
         log.info("AccountService.getAccount() method is called...");
         log.info("retrieving account for ID : {}",accountId);
@@ -113,4 +145,18 @@ public class AccountService {
         log.info("account deleted successfully");
 
     }
+
+    public String getIbanNumberById(Integer accountId) throws AccountNotFoundException {
+        log.info("AccountService.getIbanNumberById() method is called...");
+        log.info("Account ID : {}",accountId);
+        Optional<Account> accountRetrieved =  this.getAccount(accountId);
+        log.info("IBAN retrieved : {}",accountRetrieved.get().getIban());
+        return accountRetrieved.get().getIban();
+    }
+
+    public List<String> getAllIbanNumbers(){
+        log.info("AccountService.getAllIbanNumbers() method is called...");
+        return accountRepository.getAllIbanNumbers();
+    }
+
 }

@@ -9,15 +9,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name="ACCOUNT")
+@Table(name="bank_account")
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name="ID")
+    @Column(name="user_id")
     private Integer id;
-    @Column(name = "ACCOUNT_HOLDER_NAME")
+    @Column(name = "account_holder_name")
     private String accountHolderName;
-    @Column(name = "BALANCE")
+    @Column(name = "balance")
     private double balance;
+    @Column(name ="iban")
+    private String iban;
 }
